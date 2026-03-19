@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datafy — Predictive Growth Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --azure-35:   #0C5CA8;
+  --azure-46:   #0081EA;
+  --red-38:     #A31D2E;
+  --red-51:     #E32037;
+  --grey-10:    #1A1A1A;
+  --grey-42:    #6B6B6B;
+  --grey-60:    #9A9A9A;
+  --grey-80:    #CBCBCB;
+  --white:      #FFFFFF;
+  --bg:         #FFFFFF;
+  --radius-3xl: 30px;
+  --shadow-md:  0 4px 10px rgba(0,0,0,0.10);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--grey-10);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Force layout: ensure scroll container gets full height */
+body { display: flex; flex-direction: column; }
+
+/* ── NAV ── */
+#nav {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: calc(100% - 48px);
+  max-width: 1200px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-md), 0 1px 0 rgba(255,255,255,0.8) inset;
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 6px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-42);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--grey-10); }
+
+.nav-links .nav-cta {
+  background: var(--red-51);
+  color: var(--white) !important;
+  padding: 10px 22px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(227,32,55,0.35);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.nav-links .nav-cta:hover {
+  background: var(--red-38) !important;
+  transform: translateY(-1px);
+}
+
+/* ── PROGRESS DOTS ── */
+#progressDots {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--grey-80);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.dot.active {
+  background: var(--azure-46);
+  transform: scale(1.5);
+}
+
+/* ── SCROLL CONTAINER ── */
+#scrollContainer {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+#scrollContainer::-webkit-scrollbar { display: none; }
+
+/* ── SECTION BASE ── */
+section {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 500px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── HERO ── */
+.hero-section {
+  display: grid;
+  grid-template-columns: 42% 58%;
+  align-items: center;
+  padding: 88px 0 0 56px;
+  overflow: hidden;
+}
+
+.hero-text-col {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 32px;
+}
+
+.hero-image-col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.hero-screenshot {
+  width: 100%;
+  height: auto;
+  max-height: calc(100dvh - 108px);
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+  border-radius: 16px 0 0 16px;
+  opacity: 0;
+  transform: translateX(48px);
+  animation: heroSlideIn 1.0s cubic-bezier(0.22,1,0.36,1) both 0.4s;
+}
+
+@keyframes heroSlideIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,129,234,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(227,32,55,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,129,234,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,129,234,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--azure-46);
+  margin-bottom: 24px;
+  animation: fadeUp 0.9s ease both 0.3s;
+}
+
+.hero-heading {
+  font-size: clamp(32px, 4vw, 64px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--grey-10);
+  margin-bottom: 24px;
+  animation: fadeUp 1s ease both 0.55s;
+}
+
+.hero-heading em {
+  font-style: normal;
+  color: var(--azure-46);
+}
+
+.hero-sub {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--grey-42);
+  max-width: 400px;
+  margin-bottom: 36px;
+  animation: fadeUp 0.9s ease both 0.8s;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 48px;
+  animation: fadeUp 0.9s ease both 1.0s;
+}
+
+.btn-primary {
+  background: var(--red-51);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(227,32,55,0.40);
+}
+
+.btn-primary:hover { background: var(--red-38); transform: translateY(-1px); }
+
+.btn-text {
+  background: var(--white);
+  color: var(--grey-10);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.btn-text:hover { transform: translateY(-1px); }
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  animation: fadeIn 0.9s ease both 1.2s;
+}
+
+.stat-item { text-align: left; }
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--grey-10);
+  display: block;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--grey-60);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--grey-80);
+  opacity: 0.5;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 28px;
+  left: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.9s ease both 1.6s;
+  z-index: 1;
+}
+
+.scroll-indicator span {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey-60);
+}
+
+.scroll-line {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, var(--grey-60), transparent);
+  animation: pulse 2s ease infinite;
+}
+
+/* ── FEATURE SECTIONS ── */
+.feature-section {
+  display: grid;
+  grid-template-columns: 38% 62%;
+  align-items: center;
+  padding-top: 88px;
+}
+
+.text-col {
+  padding: 0 40px 0 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--azure-46);
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.section-heading {
+  font-size: clamp(26px, 2.8vw, 46px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--grey-10);
+  margin-bottom: 18px;
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.85s ease 0.12s, transform 0.85s ease 0.12s;
+}
+
+.section-body {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--grey-42);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.8s ease 0.24s, transform 0.8s ease 0.24s;
+}
+
+.section-detail {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--grey-60);
+  line-height: 1.5;
+  padding-left: 14px;
+  border-left: 2px solid var(--azure-46);
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.8s ease 0.36s, transform 0.8s ease 0.36s;
+}
+
+.image-col {
+  height: calc(100vh - 88px);
+  height: calc(100dvh - 88px);
+  display: flex;
+  align-items: center;
+  padding: 16px 56px 16px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.image-col.blend::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right,  white 0%, transparent 18%),
+    linear-gradient(to bottom, white 0%, transparent 12%, transparent 88%, white 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.image-col.blend .product-screenshot {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.product-screenshot {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  opacity: 0;
+  transform: translateX(48px);
+  transition: opacity 1.0s ease 0.15s, transform 1.0s cubic-bezier(0.22,1,0.36,1) 0.15s;
+}
+
+/* active state — triggered by JS */
+.feature-section.is-active .section-label,
+.feature-section.is-active .section-heading,
+.feature-section.is-active .section-body,
+.feature-section.is-active .section-detail,
+.feature-section.is-active .product-screenshot {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── CTA SECTION ── */
+.cta-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 88px 48px 0;
+}
+
+.cta-eyebrow {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--azure-46);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.cta-heading {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--grey-10);
+  max-width: 720px;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.85s ease 0.12s, transform 0.85s ease 0.12s;
+}
+
+.cta-sub {
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--grey-42);
+  max-width: 460px;
+  margin-bottom: 44px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s ease 0.24s, transform 0.8s ease 0.24s;
+}
+
+.cta-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 52px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s ease 0.36s, transform 0.8s ease 0.36s;
+}
+
+.btn-primary-lg {
+  background: var(--red-51);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(227,32,55,0.40);
+}
+
+.btn-primary-lg:hover { background: var(--red-38); transform: translateY(-1px); }
+
+.cta-note { font-size: 12px; color: var(--grey-60); font-style: italic; }
+
+.cta-integrations {
+  opacity: 0;
+  transition: opacity 0.8s ease 0.5s;
+}
+
+.cta-integrations p {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--grey-80);
+  margin-bottom: 12px;
+}
+
+.chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+.chip {
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(203,203,203,0.5);
+  border-radius: 30px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--grey-42);
+}
+
+.cta-section.is-active .cta-eyebrow,
+.cta-section.is-active .cta-heading,
+.cta-section.is-active .cta-sub,
+.cta-section.is-active .cta-actions,
+.cta-section.is-active .cta-integrations {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── KEYFRAMES ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  #nav { padding: 6px 16px; }
+  #progressDots { display: none; }
+
+  .hero-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 44dvh;
+    padding: 88px 24px 0;
+    align-items: start;
+  }
+  .hero-image-col { height: 44dvh; width: 100%; justify-content: center; }
+  .hero-screenshot { width: 100%; height: 100%; object-fit: contain; object-position: center top; }
+  .scroll-indicator { display: none; }
+  .hero-heading { font-size: clamp(28px, 8vw, 48px); }
+  .hero-sub { font-size: 14px; }
+  .hero-actions { flex-direction: column; width: 100%; max-width: 300px; }
+  .btn-primary, .btn-text { justify-content: center; }
+  .hero-stats { gap: 14px; flex-wrap: wrap; }
+  .stat-value { font-size: 15px; }
+
+  .feature-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: 46dvh auto;
+    padding-top: 80px;
+    align-items: start;
+  }
+
+  .image-col {
+    height: 46dvh;
+    padding: 8px 0 0;
+    order: -1;
+  }
+
+  .product-screenshot {
+    border-radius: 12px 12px 0 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+  }
+
+  .text-col { padding: 20px 24px; }
+  .section-heading { font-size: clamp(22px, 6vw, 30px); }
+  .section-body { font-size: 14px; }
+
+  /* on mobile animate as block */
+  .feature-section .section-label,
+  .feature-section .section-heading,
+  .feature-section .section-body,
+  .feature-section .section-detail {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+  }
+
+  .feature-section.is-active .section-label,
+  .feature-section.is-active .section-heading,
+  .feature-section.is-active .section-body,
+  .feature-section.is-active .section-detail {
+    opacity: 1;
+    transform: none;
+  }
+
+  .cta-section { padding: 88px 24px 0; }
+  .cta-heading { font-size: clamp(28px, 8vw, 44px); }
+}
+
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div><img src="Assets/LOGO.png" alt="datafy" style="height:52px;width:auto;object-fit:contain;display:block;"></div>
+  <ul class="nav-links">
+    <li><a href="#section-1">Platform</a></li>
+    <li><a href="#section-3">Planning</a></li>
+    <li><a href="#section-5">Cross-media</a></li>
+    <li><a href="#cta" class="nav-cta">Demo aanvragen</a></li>
+  </ul>
+</nav>
+
+<div id="progressDots"></div>
+
+<main id="scrollContainer">
+
+  <!-- 0 · HERO -->
+  <section class="hero-section" data-index="0">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-text-col">
+      <div class="hero-label">Marketing Mix Modeling Platform voor scale-ups</div>
+      <h1 class="hero-heading">Elke euro verantwoord.<br><em>Omzet voorspeld.</em></h1>
+      <p class="hero-sub">Je hebt meer data dan ooit. En minder zekerheid dan je zou willen. Kanalen claimen elkaars conversies. Rapportages spreken elkaar tegen. Datafy maakt daar een eind aan.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 7L7 13M1 7H13" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Plan een demo
+        </a>
+        <a href="#section-1" class="btn-text">Bekijk platform</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">Hoge nauwkeurigheid</span>
+          <span class="stat-label">Aantoonbaar via modelvalidatie</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">6.000+</span>
+          <span class="stat-label">Variabelen per model</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">TV · Radio · Online</span>
+          <span class="stat-label">Cross-media in één model</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-image-col">
+      <img class="hero-screenshot" src="Assets/Datafy screens/25.png" alt="Datafy Dashboard">
+    </div>
+
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section class="feature-section" id="section-1" data-index="1">
+    <div class="text-col">
+      <div class="section-label">01 / Het probleem</div>
+      <h2 class="section-heading">Marketing meet zichzelf. Niemand meet marketing.</h2>
+      <p class="section-body">Elk platform rapporteert over zijn eigen succes. Google Ads claimt de conversie. Meta ook. En retargeting strijkt met de eer voor aankopen die toch al zouden plaatsvinden. Je betaalt drie keer voor dezelfde klant en hebt geen instrument om dat aan te tonen.</p>
+      <p class="section-detail">Wat levert mijn mediabudget netto op? Niet gerapporteerd door een platform, maar berekend door een onafhankelijk model.</p>
+    </div>
+    <div class="image-col blend">
+      <img class="product-screenshot" src="Assets/images/Datafy illustrations.png" alt="Datafy Advice">
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="feature-section" data-index="2">
+    <div class="text-col">
+      <div class="section-label">02 / De oplossing</div>
+      <h2 class="section-heading">Eén model. Alle kanalen. Één waarheid.</h2>
+      <p class="section-body">Datafy integreert je advertentiedata, e-commerce data, offline media en externe marktfactoren in een econometrisch model. Het berekent de gerealiseerde bijdrage per kanaal, gecorrigeerd voor seizoensinvloeden, concurrentiegedrag en marktomstandigheden.</p>
+      <p class="section-detail">Geen black box. Geen magie. Transparante wiskunde die je zelf kunt doorgronden.</p>
+    </div>
+    <div class="image-col blend">
+      <img class="product-screenshot" src="Assets/Datafy screens/24.png" alt="Datafy Attributie">
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="feature-section" id="section-3" data-index="3">
+    <div class="text-col">
+      <div class="section-label">03 / Prognoses &amp; scenario's</div>
+      <h2 class="section-heading">Datafy kijkt vooruit.</h2>
+      <p class="section-body">Op basis van je huidige mediamix berekent Datafy de verwachte omzet voor de komende weken. Vergelijk scenario's: wat levert een budgetverhoging van 20% op? Wat als je van Search naar Social verschuift?</p>
+      <p class="section-detail">Na afloop valideert het model of de prognose klopte — met een verklaring als dat niet het geval was.</p>
+    </div>
+    <div class="image-col">
+      <img class="product-screenshot" style="box-shadow:none;" src="Assets/Datafy screens/26.png" alt="Datafy Scenario Planning">
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="feature-section" data-index="4">
+    <div class="text-col">
+      <div class="section-label">04 / Attributie</div>
+      <h2 class="section-heading">First-party attributie zonder black box.</h2>
+      <p class="section-body">Marketing Mix Modeling combineert korte- en langetermijn media-effecten per kanaal. Je ziet het volledige conversiepad — niet alleen de laatste klik. Zo weet je welke kanalen écht bijdragen aan groei en welke alleen bijdragen aan hun eigen rapportage.</p>
+      <p class="section-detail">First-party attributie, gevalideerd tegen werkelijke conversiedata.</p>
+    </div>
+    <div class="image-col">
+      <img class="product-screenshot" src="Assets/Datafy screens/9.png" alt="Datafy Journey Paths">
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="feature-section" id="section-5" data-index="5">
+    <div class="text-col">
+      <div class="section-label">05 / Cross-media inkoop</div>
+      <h2 class="section-heading">TV, radio en online. In één model.</h2>
+      <p class="section-body">Datafy is het enige platform dat offline media meetbaar maakt met dezelfde precisie als een Google Ads-rapport. TV-spots, radiozendtijd en OOH worden gemeten in hetzelfde model als je digitale kanalen. Concrete inkoopadviezen, gekoppeld aan je EBITDA-doelstelling.</p>
+      <p class="section-detail">Verschuif budget van kanaal A naar kanaal B — en zie direct het verwachte effect op je CPA.</p>
+    </div>
+    <div class="image-col">
+      <img class="product-screenshot" src="Assets/Datafy screens/18.png" alt="Datafy TV & Radio">
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="feature-section" data-index="6">
+    <div class="text-col">
+      <div class="section-label">06 / Modelvalidatie</div>
+      <h2 class="section-heading">Elke prognose wordt getoetst aan de werkelijkheid.</h2>
+      <p class="section-body">Datafy valideert elke voorspelling na afloop. Klopte de prognose? Bewijs dat het model werkt. Zo nee, een precieze verklaring: marktomstandigheden, seizoensinvloeden, concurrentiegedrag of datakwaliteit. Het model verbetert continu.</p>
+      <p class="section-detail">Het enige marketing intelligence platform met een gesloten voorspelling-validatieloop.</p>
+    </div>
+    <div class="image-col">
+      <img class="product-screenshot" style="box-shadow:none;" src="Assets/Datafy screens/26.png" alt="Datafy Validatie">
+    </div>
+  </section>
+
+  <!-- 7 · CTA -->
+  <section class="cta-section" id="cta" data-index="7">
+    <div class="cta-eyebrow">Gebouwd voor teams die sturen op groei</div>
+    <h2 class="cta-heading">Klaar om te sturen op bewijs?</h2>
+    <p class="cta-sub">Een demo duurt 30 minuten. We werken met jouw kanalen, jouw data en jouw KPI-doelstellingen. Aan het einde weet je precies wat Datafy voor jouw situatie kan betekenen.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-primary-lg">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 7L7 13M1 7H13" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Plan een demo
+      </a>
+      <span class="cta-note">30 minuten. Jouw data. Concrete inzichten.</span>
+    </div>
+    <div class="cta-integrations">
+      <p>Integreert met</p>
+      <div class="chips">
+        <span class="chip">Google Ads</span>
+        <span class="chip">Meta Ads</span>
+        <span class="chip">TikTok Ads</span>
+        <span class="chip">Shopify</span>
+        <span class="chip">GA4</span>
+        <span class="chip">TV &amp; Radio</span>
+        <span class="chip">Daisycon</span>
+        <span class="chip">Awin</span>
+        <span class="chip">WooCommerce</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var container = document.getElementById('scrollContainer');
+  var dotsEl    = document.getElementById('progressDots');
+  var sections  = Array.prototype.slice.call(document.querySelectorAll('[data-index]'));
+  var total     = sections.length;
+
+  // Build progress dots
+  sections.forEach(function(s, i) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', function() {
+      scrollTo(i);
+    });
+    dotsEl.appendChild(d);
+  });
+
+  function scrollTo(i) {
+    var h = container.clientHeight || window.innerHeight;
+    container.scrollTo({ top: i * h, behavior: 'smooth' });
+  }
+
+  function activate(i) {
+    if (i < 0 || i >= total) return;
+    sections[i].classList.add('is-active');
+    var dots = document.querySelectorAll('.dot');
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].classList.toggle('active', j === i);
+    }
+  }
+
+  function onScroll() {
+    var h = container.clientHeight || window.innerHeight;
+    if (h === 0) return;
+    var i = Math.round(container.scrollTop / h);
+    activate(i);
+  }
+
+  // Activate hero immediately — don't wait for scroll
+  activate(0);
+
+  container.addEventListener('scroll', onScroll, { passive: true });
+
+  // Anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var href = a.getAttribute('href');
+      var target = document.querySelector(href);
+      if (!target || target.dataset.index === undefined) return;
+      e.preventDefault();
+      scrollTo(parseInt(target.dataset.index, 10));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
