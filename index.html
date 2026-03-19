@@ -4,9 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Datafy — Predictive Growth Engine</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'BBAnonymPro';
+  src: url('Fonts/font.woff2') format('woff2'),
+       url('Fonts/font.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+</style>
 <style>
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,11 +33,18 @@
   --shadow-md:  0 4px 10px rgba(0,0,0,0.10);
 }
 
-html, body {
+html {
   height: 100%;
   overflow: hidden;
   background: var(--bg);
-  font-family: 'DM Sans', sans-serif;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'BBAnonymPro', 'DM Sans', sans-serif;
+  font-weight: 300;
   color: var(--grey-10);
   -webkit-font-smoothing: antialiased;
 }
@@ -53,7 +67,7 @@ body { display: flex; flex-direction: column; }
   border-radius: var(--radius-3xl);
   box-shadow: var(--shadow-md), 0 1px 0 rgba(255,255,255,0.8) inset;
   border: 1px solid rgba(255,255,255,0.6);
-  padding: 6px 28px;
+  padding: 6px 28px 6px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,6 +137,8 @@ body { display: flex; flex-direction: column; }
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
+  position: relative;
+  z-index: 1;
 }
 
 #scrollContainer::-webkit-scrollbar { display: none; }
@@ -136,7 +152,7 @@ section {
   scroll-snap-stop: always;
   position: relative;
   overflow: hidden;
-  background: var(--bg);
+  background: transparent;
 }
 
 /* ── HERO ── */
@@ -218,9 +234,9 @@ section {
 
 .hero-heading {
   font-size: clamp(32px, 4vw, 64px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
   color: var(--grey-10);
   margin-bottom: 24px;
   animation: fadeUp 1s ease both 0.55s;
@@ -373,9 +389,9 @@ section {
 
 .section-heading {
   font-size: clamp(26px, 2.8vw, 46px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
   color: var(--grey-10);
   margin-bottom: 18px;
   opacity: 0;
@@ -478,9 +494,9 @@ section {
 
 .cta-heading {
   font-size: clamp(36px, 5vw, 64px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.05;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.01em;
   color: var(--grey-10);
   max-width: 720px;
   margin-bottom: 20px;
@@ -552,10 +568,20 @@ section {
   background: rgba(255,255,255,0.6);
   border: 1px solid rgba(203,203,203,0.5);
   border-radius: 30px;
-  padding: 5px 12px;
+  padding: 5px 12px 5px 8px;
   font-size: 11px;
   font-weight: 500;
   color: var(--grey-42);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
 }
 
 .cta-section.is-active .cta-eyebrow,
@@ -585,70 +611,173 @@ section {
 
 /* ── MOBILE ── */
 @media (max-width: 768px) {
-  #nav { padding: 6px 16px; }
+
+  /* Nav: toon alleen logo + CTA */
+  #nav {
+    padding: 6px 12px 6px 12px;
+    border-radius: 20px;
+    top: 10px;
+    width: calc(100% - 24px);
+  }
+  #nav img { height: 38px !important; }
+  .nav-links li:not(:last-child) { display: none; }
+  .nav-links { gap: 0; }
+  .nav-links .nav-cta { padding: 8px 16px; font-size: 12px; }
+
   #progressDots { display: none; }
 
+  /* Disable snap on mobile — let it scroll freely */
+  #scrollContainer { scroll-snap-type: none; }
+  section {
+    height: auto;
+    min-height: unset;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+
+  /* Hero: beeld boven, tekst onder */
   .hero-section {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 44dvh;
-    padding: 88px 24px 0;
+    grid-template-rows: auto auto;
+    padding: 72px 0 40px;
     align-items: start;
   }
-  .hero-image-col { height: 44dvh; width: 100%; justify-content: center; }
-  .hero-screenshot { width: 100%; height: 100%; object-fit: contain; object-position: center top; }
+  .hero-text-col {
+    order: 2;
+    padding: 20px 24px 0;
+  }
+  .hero-image-col {
+    order: 1;
+    height: auto;
+    width: 100%;
+    padding: 12px 20px 0;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: 0;
+  }
+  .hero-screenshot {
+    width: 100%;
+    height: auto;
+    max-height: 36dvh;
+    object-fit: contain;
+    object-position: center top;
+    border-radius: 10px;
+  }
   .scroll-indicator { display: none; }
-  .hero-heading { font-size: clamp(28px, 8vw, 48px); }
-  .hero-sub { font-size: 14px; }
-  .hero-actions { flex-direction: column; width: 100%; max-width: 300px; }
-  .btn-primary, .btn-text { justify-content: center; }
-  .hero-stats { gap: 14px; flex-wrap: wrap; }
-  .stat-value { font-size: 15px; }
+  .hero-heading { font-size: clamp(26px, 7vw, 40px); margin-bottom: 12px; }
+  .hero-sub { font-size: 14px; margin-bottom: 24px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-primary, .btn-text { justify-content: center; width: 100%; }
+  .hero-stats { gap: 0; flex-wrap: nowrap; margin-top: 20px; width: 100%; }
+  .hero-stats .stat-item { flex: 1; min-width: 0; padding: 0 12px; }
+  .hero-stats .stat-item:first-child { padding-left: 0; }
+  .stat-divider { flex-shrink: 0; }
+  .stat-value { font-size: 12px; white-space: normal; }
+  .stat-label { font-size: 9px; white-space: normal; }
 
+  /* Feature secties: beeld boven, tekst onder */
   .feature-section {
     grid-template-columns: 1fr;
-    grid-template-rows: 46dvh auto;
-    padding-top: 80px;
+    grid-template-rows: auto auto;
+    padding-top: 28px;
+    padding-bottom: 40px;
     align-items: start;
   }
-
   .image-col {
-    height: 46dvh;
-    padding: 8px 0 0;
     order: -1;
-  }
-
-  .product-screenshot {
-    border-radius: 12px 12px 0 0;
+    height: auto;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top left;
+    padding: 12px 20px 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .product-screenshot {
+    border-radius: 10px;
+    width: 100%;
+    height: auto;
+    max-height: 38dvh;
+    object-fit: contain;
+    object-position: center top;
+    box-shadow: none !important;
+  }
+  .text-col {
+    order: 1;
+    padding: 24px 24px 40px;
+  }
+  .section-label { margin-bottom: 8px; }
+  .section-heading { font-size: clamp(20px, 6vw, 28px); margin-bottom: 10px; }
+  .section-body { font-size: 13px; margin-bottom: 12px; }
+  .section-detail { font-size: 11px; }
+
+  /* Hero direct zichtbaar op mobiel */
+  .hero-label,
+  .hero-heading,
+  .hero-sub,
+  .hero-actions,
+  .hero-stats,
+  .hero-stat,
+  .stat-value,
+  .stat-label,
+  .hero-screenshot {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
   }
 
-  .text-col { padding: 20px 24px; }
-  .section-heading { font-size: clamp(22px, 6vw, 30px); }
-  .section-body { font-size: 14px; }
-
-  /* on mobile animate as block */
-  .feature-section .section-label,
-  .feature-section .section-heading,
-  .feature-section .section-body,
-  .feature-section .section-detail {
+  /* Feature secties: slide omhoog op mobiel */
+  .section-label,
+  .section-heading,
+  .section-body,
+  .section-detail,
+  .product-screenshot {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+    transform: translateY(28px);
+    transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22,1,0.36,1);
   }
-
+  .feature-section.is-active .section-label    { transition-delay: 0s; }
+  .feature-section.is-active .product-screenshot { transition-delay: 0s; }
+  .feature-section.is-active .section-heading  { transition-delay: 0.13s; }
+  .feature-section.is-active .section-body     { transition-delay: 0.24s; }
+  .feature-section.is-active .section-detail   { transition-delay: 0.35s; }
   .feature-section.is-active .section-label,
   .feature-section.is-active .section-heading,
   .feature-section.is-active .section-body,
-  .feature-section.is-active .section-detail {
+  .feature-section.is-active .section-detail,
+  .feature-section.is-active .product-screenshot {
     opacity: 1;
     transform: none;
   }
 
-  .cta-section { padding: 88px 24px 0; }
-  .cta-heading { font-size: clamp(28px, 8vw, 44px); }
+  /* CTA direct zichtbaar */
+  .cta-eyebrow,
+  .cta-heading,
+  .cta-sub,
+  .cta-actions,
+  .cta-integrations {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 80px 24px 48px;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .cta-eyebrow { margin-bottom: 12px; }
+  .cta-heading { font-size: clamp(26px, 7vw, 40px); margin-bottom: 14px; }
+  .cta-sub { font-size: 14px; margin-bottom: 28px; }
+  .cta-actions { flex-direction: column; width: 100%; align-items: stretch; }
+  .cta-actions .btn-primary,
+  .cta-actions .btn-secondary { justify-content: center; width: 100%; }
+  .chips { gap: 6px; justify-content: flex-start; }
+  .chip { font-size: 11px; padding: 5px 10px; }
 }
 
 </style>
@@ -656,7 +785,7 @@ section {
 <body>
 
 <nav id="nav">
-  <div><img src="Assets/LOGO.png" alt="datafy" style="height:52px;width:auto;object-fit:contain;display:block;"></div>
+  <div><img src="Assets/Logo/LOGO.png" alt="datafy" style="height:56px;width:auto;object-fit:contain;display:block;"></div>
   <ul class="nav-links">
     <li><a href="#section-1">Platform</a></li>
     <li><a href="#section-3">Planning</a></li>
@@ -787,7 +916,7 @@ section {
       <p class="section-detail">Het enige marketing intelligence platform met een gesloten voorspelling-validatieloop.</p>
     </div>
     <div class="image-col">
-      <img class="product-screenshot" src="Assets/Datafy screens/28.png" alt="Datafy Validatie">
+      <img class="product-screenshot" style="box-shadow:none;" src="Assets/images/Compare_model.png" alt="Datafy Validatie">
     </div>
   </section>
 
@@ -806,15 +935,24 @@ section {
     <div class="cta-integrations">
       <p>Integreert met</p>
       <div class="chips">
-        <span class="chip">Google Ads</span>
-        <span class="chip">Meta Ads</span>
-        <span class="chip">TikTok Ads</span>
-        <span class="chip">Shopify</span>
-        <span class="chip">GA4</span>
-        <span class="chip">TV &amp; Radio</span>
-        <span class="chip">Daisycon</span>
-        <span class="chip">Awin</span>
-        <span class="chip">WooCommerce</span>
+        <span class="chip"><img src="Assets/icons/googleads.svg" width="16" height="16" alt="">Google Ads</span>
+        <span class="chip"><img src="Assets/icons/meta.svg" width="16" height="16" alt="">Meta Ads</span>
+        <span class="chip"><img src="Assets/icons/tiktok.svg" width="16" height="16" alt="">TikTok Ads</span>
+        <span class="chip"><img src="Assets/icons/shopify.svg" width="16" height="16" alt="">Shopify</span>
+        <span class="chip"><img src="Assets/icons/googleanalytics.svg" width="16" height="16" alt="">GA4</span>
+        <span class="chip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><rect x="2" y="4" width="20" height="15" rx="2" stroke="#E53935" stroke-width="1.8"/><path d="M8 23h8M12 19v4" stroke="#E53935" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="11" r="3" stroke="#E53935" stroke-width="1.8"/></svg>
+          TV &amp; Radio
+        </span>
+        <span class="chip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="9" stroke="#FF6B35" stroke-width="1.8"/><path d="M7 12h10M12 7v10" stroke="#FF6B35" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Daisycon
+        </span>
+        <span class="chip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M3 17l4-10 5 8 3-5 4 7" stroke="#007AC2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Awin
+        </span>
+        <span class="chip"><img src="Assets/icons/woocommerce.svg" width="16" height="16" alt="">WooCommerce</span>
       </div>
     </div>
   </section>
@@ -862,7 +1000,24 @@ section {
   // Activate hero immediately — don't wait for scroll
   activate(0);
 
+  // Desktop: snap scroll event
   container.addEventListener('scroll', onScroll, { passive: true });
+
+  // Mobile: IntersectionObserver voor vrij scrollen
+  var observer = new IntersectionObserver(function(entries) {
+    if (!window.matchMedia('(max-width: 768px)').matches) return;
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !entry.target.classList.contains('is-active')) {
+        var el = entry.target;
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            el.classList.add('is-active');
+          });
+        });
+      }
+    });
+  }, { root: null, threshold: 0, rootMargin: '0px 0px -15% 0px' });
+  sections.forEach(function(s) { observer.observe(s); });
 
   // Anchor links
   document.querySelectorAll('a[href^="#"]').forEach(function(a) {
